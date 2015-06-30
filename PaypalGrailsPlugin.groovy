@@ -10,10 +10,10 @@ class PaypalGrailsPlugin {
 
     // TODO Fill in these fields
     def title = "Paypal Plugin" // Headline display name of the plugin
-    def author = "Your name"
-    def authorEmail = ""
+    def author = "Omasirichukwu Joseph Udeinya"
+    def authorEmail = "omasiri@novadge.com"
     def description = '''\
-Brief summary/description of the plugin.
+Accept and process payments with paypal api
 '''
 
     // URL to the plugin's documentation
@@ -25,7 +25,7 @@ Brief summary/description of the plugin.
 //    def license = "APACHE"
 
     // Details of company behind the plugin (if there is one)
-//    def organization = [ name: "My Company", url: "http://www.my-company.com/" ]
+    def organization = [ name: "Novadge", url: "http://www.novadge.com/" ]
 
     // Any additional developers beyond the author specified above.
 //    def developers = [ [ name: "Joe Bloggs", email: "joe@bloggs.net" ]]
@@ -34,7 +34,7 @@ Brief summary/description of the plugin.
 //    def issueManagement = [ system: "JIRA", url: "http://jira.grails.org/browse/GPMYPLUGIN" ]
 
     // Online location of the plugin's browseable source code.
-//    def scm = [ url: "http://svn.codehaus.org/grails-plugins/" ]
+    def scm = [ url: "http://github.com/Novadge/grails-paypal/" ]
 
     def doWithWebDescriptor = { xml ->
         // TODO Implement additions to web.xml (optional), this event occurs before
