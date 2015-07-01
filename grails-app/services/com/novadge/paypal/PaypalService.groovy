@@ -163,11 +163,11 @@ class PaypalService {
         return createdPayment
     }
 	
-	def createPaymentExecution(Map props,APIContext apiContext){
-		Payment payment = new Payment(props['paymentId']);
+	Payment createPaymentExecution(Map props,APIContext apiContext){
+		Payment payment = Payment.get(apiContext, props['paymentId']);
 		PaymentExecution paymentExecute = new PaymentExecution();
 		paymentExecute.setPayerId(props['payerId']);
-		payment.execute(apiContext, paymentExecute);
+		return payment.execute(apiContext, paymentExecute);
 	}
         
         
