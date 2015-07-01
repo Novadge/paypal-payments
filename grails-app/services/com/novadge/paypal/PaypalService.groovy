@@ -162,6 +162,13 @@ class PaypalService {
         Payment createdPayment = payment.create(props['apiContext']);
         return createdPayment
     }
+	
+	def createPaymentExecution(Map props,APIContext apiContext){
+		Payment payment = new Payment(props['paymentId');
+		PaymentExecution paymentExecute = new PaymentExecution();
+		paymentExecute.setPayerId(props['payerId']);
+		payment.execute(apiContext, paymentExecute);
+	}
         
         
     RedirectUrls createRedirectUrls(Map props){
