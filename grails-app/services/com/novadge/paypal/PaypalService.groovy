@@ -67,14 +67,25 @@ class PaypalService {
      * Retrieve the api context 
      * @param accessToken : Your access token gotten from getAccessToken()
      * @param sdkConfig : map of sdk config 
-     * eg ["service.EndPoint":"https://api.sandbox.paypal.com"] or 
-     * ['mode':'sandbox']
      * @returns APIContext : api context
      **/
     APIContext getAPIContext(String accessToken,Map sdkConfig){
         APIContext apiContext = new APIContext(accessToken);
         apiContext.setConfigurationMap(sdkConfig);
         return apiContext
+    }
+    
+    /**
+     * APIContext
+     * Retrieve the api context 
+     * @param accessToken : Your access token gotten from getAccessToken()
+     * @param sdkConfig :
+     * @param requestId : something meaningful to your application
+     * @returns APIContext : api context
+     **/
+    APIContext createAPIContext(String accessToken,String requestId){
+        return new APIContext(accessToken,requestId);
+        
     }
      
     /**
@@ -95,7 +106,7 @@ class PaypalService {
     }
     
     /**
-     * Details
+     *  Let's you specify details of a payment amount.
      * Create details for a payment
      * @param props : map of properties
      * eg ["shipping":"10.00","subTotal":"10.00","tax":"0.00"]
@@ -139,7 +150,7 @@ class PaypalService {
         return transaction
     }
     
-    /*
+    /* ##Payer: A resource representing a Payer that funds a payment
      * Let's you create a payer object.
      * @param props : map of properties
      * props.paymentMethod: payment method eg credit_card,paypal
@@ -152,7 +163,17 @@ class PaypalService {
         payer.setFundingInstruments(props['fundingInstrumentList']);//List
         return payer
     }
-        
+     
+    /* 
+     * Create a payment
+     * @param props : Map of payment properties
+     * @props.intent : payment intent eg 'sale', etc
+     * @props.payer : payer
+     * @props.transactionList : transaction list
+     * @props.redirectUrls : redirect urls
+     * @props.apiContext : ApiContext
+     * @returns Payment : payment object
+     * */
     Payment createPayment(Map props){
         Payment payment = new Payment();
         payment.setIntent(props['intent']);
@@ -162,15 +183,46 @@ class PaypalService {
         Payment createdPayment = payment.create(props['apiContext']);
         return createdPayment
     }
-	
-	Payment createPaymentExecution(Map props,APIContext apiContext){
-		Payment payment = Payment.get(apiContext, props['paymentId']);
-		PaymentExecution paymentExecute = new PaymentExecution();
-		paymentExecute.setPayerId(props['payerId']);
-		return payment.execute(apiContext, paymentExecute);
-	}
+    
+    /* 
+     * Create a payment
+     * @param props : Map of payment properties
+     * @props.intent : payment intent eg 'sale', etc
+     * @props.payer : payer
+     * @props.transactionList : transaction list
+     * @props.redirectUrls : redirect urls
+     * @props.apiContext : ApiContext
+     * @returns Payment : payment object
+     * */
+    Refund createRefund(Map props){
+        Refund refund = new Refund();
+	refund.setAmount(props['amount']);
+        return refund
+    }
+
+    /*
+     * Execute a payment
+     * @params props : Map of properties
+     * @params apiContext : ApiContext 
+     * @props.paymentId : Payment id
+     * @props.payerId : Payer id (usually returned by paypal )
+     * @returns Payment : executed Payment
+     * */
+    Payment createPaymentExecution(Map props,APIContext apiContext){
+        Payment payment = Payment.get(apiContext, props['paymentId']);
+        PaymentExecution paymentExecute = new PaymentExecution();
+        paymentExecute.setPayerId(props['payerId']);
+        return payment.execute(apiContext, paymentExecute);
+    }
         
-        
+     
+    /*
+     * Create redirect urls
+     * @params props : Map of properties
+     * @props.cancelUrl : Url to redirect the user if the transaction is canceled 
+     * @props.returnUrl : Url to rediect the user if the transaction is successful
+     * @returns : RedirectUrl : an instance of RedirectUrls
+     * */
     RedirectUrls createRedirectUrls(Map props){
         RedirectUrls redirectUrls = new RedirectUrls();
         redirectUrls.setCancelUrl(props['cancelUrl']);
@@ -210,22 +262,35 @@ class PaypalService {
     }
      
     /* ###CreditCard
-     * A resource representing a credit card that can be
+     * Create A resource representing a credit card that can be
      * used to fund a payment.
+     * @param props : Map of card properties
+     * @param apiContext : API Context
+     * @props.ccv2 : int 
+     * @props.expireMonth : int eg 8
+     * @props.expireYear : int eg 2012
+     * @props.firstName : First name as it appears on card
+     * @props.lastName : Last name.......
+     * @props.cardNumber : Card number
+     * @props.type : Type of card eg
+     * @props.billingAddress: Billing Address
+     * @props.payerId : Payer id
+     * @returns CreditCard : credit card instance
+     * 
      * */
-    CreditCard createCreditCard(Map cardProps,APIContext apiContext){
+    CreditCard createCreditCard(Map props,APIContext apiContext){
         
         CreditCard creditCard = new CreditCard();
         
-        creditCard.setCvv2(cardProps['ccv2']);// int
-        creditCard.setExpireMonth(cardProps['expireMonth']); // int eg 8
-        creditCard.setExpireYear(cardProps['expireYear']); // int eg 2012
-        creditCard.setFirstName(cardProps['firstName']);
-        creditCard.setLastName(cardProps['lastName']);
-        creditCard.setNumber(cardProps['cardNumber']); // string eg 5554443344655
-        creditCard.setType(cardProps['type']); // string eg mastercard, visa, etc
-        creditCard.setBillingAddress(cardProps['billingAddress']);
-        creditCard.setPayerId(cardProps['payerId']);
+        creditCard.setCvv2(props['ccv2']);// int
+        creditCard.setExpireMonth(props['expireMonth']); // int eg 8
+        creditCard.setExpireYear(props['expireYear']); // int eg 2012
+        creditCard.setFirstName(props['firstName']);
+        creditCard.setLastName(props['lastName']);
+        creditCard.setNumber(props['cardNumber']); // string eg 5554443344655
+        creditCard.setType(props['type']); // string eg mastercard, visa, etc
+        creditCard.setBillingAddress(props['billingAddress']);
+        creditCard.setPayerId(props['payerId']);
 
             
         // ###Save
@@ -258,18 +323,17 @@ class PaypalService {
     }
     
     
-    // #GetCapture Sample
-    // This sample code demonstrate how you
-    // can retrieve the details of a Capture
-    // resource
-    // API used: /v1/payments/capture/{capture_id}
+    /* 
+     * retrieve the details of a Capture resource
+     * @param apiContext : APIContext
+     * @param amount : amount
+     * @param authorization : authorization
+     * @returns Capture : capture
+     * API used: /v1/payments/capture/{capture_id}
+     * 
+     * */
     private Capture getCapture(APIContext apiContext, Amount amount, Authorization authorization) throws PayPalRESTException{
-        // ###Amount
-        // Let's you specify a capture amount.
-        //		Amount amount = new Amount();
-        //		amount.setCurrency("USD");
-        //		amount.setTotal("4.54");
-
+        
         // ###Capture
         Capture capture = new Capture();
         capture.setAmount(amount);
@@ -287,172 +351,16 @@ class PaypalService {
         return responseCapture;
     }
         
-    private Authorization getAuthorization(CreditCard creditCard,Address billingAddress,Amount amount,APIContext apiContext)
+    private Authorization getAuthorization(Payer payer, List<Transaction> transactions,APIContext apiContext)
     throws PayPalRESTException {
-        //
-        //		// ###Details
-        //		// Let's you specify details of a payment amount.
-        //		Details details = new Details();
-        //		details.setShipping("0.03");
-        //		details.setSubtotal("107.41");
-        //		details.setTax("0.03");
-        //
-        //		// ###Amount
-        //		// Let's you specify a payment amount.
-        //		Amount amount = new Amount();
-        //		amount.setCurrency("USD");
-        //		amount.setTotal("107.47");
-        //		amount.setDetails(details);
-
-        // ###Transaction
-        // A transaction defines the contract of a
-        // payment - what is the payment for and who
-        // is fulfilling it. Transaction is created with
-        // a `Payee` and `Amount` types
-        Transaction transaction = new Transaction();
-        transaction.setAmount(amount);
-        transaction
-        .setDescription("This is the payment transaction description.");
-
-        // The Payment creation API requires a list of
-        // Transaction; add the created `Transaction`
-        // to a List
-        List<Transaction> transactions = new ArrayList<Transaction>();
-        transactions.add(transaction);
-
-        //		// ###Address
-        //		// Base Address object used as shipping or billing
-        //		// address in a payment. [Optional]
-        //		Address billingAddress = new Address();
-        //		billingAddress.setCity("Johnstown");
-        //		billingAddress.setCountryCode("US");
-        //		billingAddress.setLine1("52 N Main ST");
-        //		billingAddress.setPostalCode("43210");
-        //		billingAddress.setState("OH");
-
-        //		// ###CreditCard
-        //		// A resource representing a credit card that can be
-        //		// used to fund a payment.
-        //		CreditCard creditCard = new CreditCard();
-        //		creditCard.setBillingAddress(billingAddress);
-        //		creditCard.setCvv2(874);
-        //		creditCard.setExpireMonth(11);
-        //		creditCard.setExpireYear(2018);
-        //		creditCard.setFirstName("Joe");
-        //		creditCard.setLastName("Shopper");
-        //		creditCard.setNumber("4417119669820331");
-        //		creditCard.setType("visa");
-
-        // ###FundingInstrument
-        // A resource representing a Payeer's funding instrument.
-        // Use a Payer ID (A unique identifier of the payer generated
-        // and provided by the facilitator. This is required when
-        // creating or using a tokenized funding instrument)
-        // and the `CreditCardDetails`
-        FundingInstrument fundingInstrument = new FundingInstrument();
-        fundingInstrument.setCreditCard(creditCard);
-
-        // The Payment creation API requires a list of
-        // FundingInstrument; add the created `FundingInstrument`
-        // to a List
-        List<FundingInstrument> fundingInstruments = new ArrayList<FundingInstrument>();
-        fundingInstruments.add(fundingInstrument);
-
-        // ###Payer
-        // A resource representing a Payer that funds a payment
-        // Use the List of `FundingInstrument` and the Payment Method
-        // as 'credit_card'
-        Payer payer = new Payer();
-        payer.setFundingInstruments(fundingInstruments);
-        payer.setPaymentMethod("credit_card");
-
-        // ###Payment
-        // A Payment Resource; create one using
-        // the above types and intent as 'authorize'
-        Payment payment = new Payment();
-        payment.setIntent("authorize");
-        payment.setPayer(payer);
-        payment.setTransactions(transactions);
-
-        Payment responsePayment = payment.create(apiContext);
+       
+        Payment responsePayment = createPayment(['intent':'authorize','payer':payer,'transactionList':transactions,'apiContext':apiContext])
         return responsePayment.getTransactions().get(0).getRelatedResources()
         .get(0).getAuthorization();
     }
     
-       
-
-    def authorizationCapture(){
-        try {
-            accessToken = GenerateAccessToken.getAccessToken();
-
-            // ### Api Context
-            // Pass in a `ApiContext` object to authenticate
-            // the call and to send a unique request id
-            // (that ensures idempotency). The SDK generates
-            // a request id if you do not pass one explicitly.
-            apiContext = new APIContext(accessToken);
-            // Use this variant if you want to pass in a request id
-            // that is meaningful in your application, ideally
-            // a order id.
-            /*
-             * String requestId = Long.toString(System.nanoTime(); APIContext
-             * apiContext = new APIContext(accessToken, requestId ));
-             */
-
-            // ###Reauthorization
-            // Retrieve a authorization id from authorization object
-            // by making a `Payment Using PayPal` with intent
-            // as `authorize`. You can reauthorize a payment only once 4 to 29
-            // days after 3-day honor period for the original authorization
-            // expires.
-            Authorization authorization = Authorization.get(apiContext,
-					"7GH53639GA425732B");
-
-            // ###Amount
-            // Let's you specify a capture amount.
-            Amount amount = new Amount();
-            amount.setCurrency("USD");
-            amount.setTotal("4.54");
-
-            authorization.setAmount(amount);
-            // Reauthorize by POSTing to
-            // URI v1/payments/authorization/{authorization_id}/reauthorize
-            Authorization reauthorization = authorization
-            .reauthorize(apiContext);
-
-            LOGGER.info("Reauthorization id = " + reauthorization.getId()
-                + " and status = " + reauthorization.getState());
-            ResultPrinter.addResult(req, resp, "Reauthorized a Payment", Authorization.getLastRequest(), Authorization.getLastResponse(), null);
-        } catch (PayPalRESTException e) {
-            ResultPrinter.addResult(req, resp, "Reauthorized a Payment", Authorization.getLastRequest(), null, e.getMessage());
-        }
-		
-    } 
-    
-    def voidAuthorization(){
-        // ###AccessToken
-        // Retrieve the access token from
-        // OAuthTokenCredential by passing in
-        // ClientID and ClientSecret
-        APIContext apiContext = null;
-        String accessToken = null;
-            
-        accessToken = GenerateAccessToken.getAccessToken();
-
-        // ### Api Context
-        // Pass in a `ApiContext` object to authenticate
-        // the call and to send a unique request id
-        // (that ensures idempotency). The SDK generates
-        // a request id if you do not pass one explicitly.
-        apiContext = new APIContext(accessToken);
-        // Use this variant if you want to pass in a request id
-        // that is meaningful in your application, ideally
-        // a order id.
-        /*
-         * String requestId = Long.toString(System.nanoTime(); APIContext
-         * apiContext = new APIContext(accessToken, requestId ));
-         */
-
+    def voidAuthorization(APIContext apiContext){
+        
         // ###Authorization
         // Retrieve a Authorization object
         // by making a Payment with intent
@@ -464,127 +372,46 @@ class PaypalService {
         // URI v1/payments/authorization/{authorization_id}/void
         Authorization returnAuthorization = authorization.doVoid(apiContext);
 
+    }  
+
+        
+    
+    /* #RefundCapture Sample
+     * This sample code demonstrate how you
+     * can do a Refund on a Capture resource
+     * API used: /v1/payments/capture/{capture_id}/refund
+     * */
+    def refundCapture(String accessToken,Refund refund){
+        //TODO : Refund a capture
     }
     
-    // #RefundCapture Sample
-    // This sample code demonstrate how you
-    // can do a Refund on a Capture
-    // resource
-    // API used: /v1/payments/capture/{capture_id}/refund
-    def refundCapture(){
-        // ###AccessToken
-        // Retrieve the access token from
-        // OAuthTokenCredential by passing in
-        // ClientID and ClientSecret
-        APIContext apiContext = null;
-        String accessToken = null;
-        try {
-            accessToken = GenerateAccessToken.getAccessToken();
-
-            // ### Api Context
-            // Pass in a `ApiContext` object to authenticate
-            // the call and to send a unique request id
-            // (that ensures idempotency). The SDK generates
-            // a request id if you do not pass one explicitly.
-            apiContext = new APIContext(accessToken);
-            // Use this variant if you want to pass in a request id
-            // that is meaningful in your application, ideally
-            // a order id.
-            /*
-             * String requestId = Long.toString(System.nanoTime(); APIContext
-             * apiContext = new APIContext(accessToken, requestId ));
-             */
-
-            // ###Authorization
-            // Retrieve a Authorization object
-            // by making a Payment with intent
-            // as 'authorize'
-            Authorization authorization = getAuthorization(apiContext);
-			
-            /// ###Capture
-            // Create a Capture object
-            // by doing a capture on
-            // Authorization object
-            Capture capture = getCapture(apiContext, authorization);
-			
-            /// ###Refund
-            /// Create a Refund object
-            Refund refund = new Refund(); 
-			
-            // ###Amount
-            // Let's you specify a capture amount.
-            Amount amount = new Amount();
-            amount.setCurrency("USD").setTotal("1");
-			
-            refund.setAmount(amount);
-			
-            // Create new APIContext for 
-            // Refund
-            apiContext = new APIContext(accessToken);
-            // Do a Refund by
-            // POSTing to 
-            // URI v1/payments/capture/{capture_id}/refund
-            Refund responseRefund = capture.refund(apiContext, refund); 
-			
-            LOGGER.info("Refund id = " + responseRefund.getId()
-                + " and status = " + responseRefund.getState());
-            ResultPrinter.addResult(req, resp, "Refund a Capture", Refund.getLastRequest(), Refund.getLastResponse(), null);
-			
-        } catch (PayPalRESTException e) {
-            ResultPrinter.addResult(req, resp, "Refund a Capture", Refund.getLastRequest(), null, e.getMessage());
-        }
-    }
-    
-    def saleRefund(String saleId,Amount amount, APIContext apiContext){
-        // ###Sale
-        // A sale transaction.
-        // Create a Sale object with the
-        // given sale transaction id.
-        Sale sale = new Sale(); 
-        sale.setId(saleId);
-
-        // ###Refund
-        // A refund transaction.
-        // Use the amount to create
-        // a refund object
-        Refund refund = new Refund(); 
-        // ###Amount
-        // Create an Amount object to
-        // represent the amount to be
-        // refunded. Create the refund object, if the refund is partial
-            
-        refund.setAmount(amount);
-           
-			
-        // Refund by posting to the APIService
-        // using a valid AccessToken
+    def refundSale(Sale sale,Refund refund, APIContext apiContext){
+        
         sale.refund(apiContext, refund);
              
     }
         
-    
-    /*
-     *
-     * eg containerMap.put("count", "10");
+    /* ###Retrieve
+     * Retrieve the PaymentHistory object
+     * @param containerMap : map of query parameters for paginations and filtering
+     * @param accessToken : AccessToken 
+     * Refer the API documentation for valid values for container map keys
      **/
     def getPaymentHistory(Map containerMap, String accessToken){
             
-        // ###Retrieve
         // Retrieve the PaymentHistory object by calling the
         // static `get` method
-        // on the Payment class, and pass the
-        // AccessToken and a ContainerMap object that contains
-        // query parameters for paginations and filtering.
-        // Refer the API documentation
-        // for valid values for keys
+        // on the Payment class, and pass the AccessToken and a ContainerMap object
         return Payment.list(accessToken, containerMap); 
                 
     }
     
-    // # Get Sale By SaleID  how to get details about a sale.
-    // # retrieve 
-    // details of completed Sale Transaction.
-    // API used: /v1/payments/sale/{sale-id}
+    /* Get Sale By SaleID 
+     *  retrieve details of completed Sale Transaction.
+     *  @param saleId : sale id
+     *  @param accessToken : access token
+     * API used: /v1/payments/sale/{sale-id}
+     **/
     def getSale(String saleId, String accessToken){
             
         // Pass an AccessToken and the ID of the sale

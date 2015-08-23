@@ -13,7 +13,7 @@ class PaypalGrailsPlugin {
     def author = "Omasirichukwu Joseph Udeinya"
     def authorEmail = "omasiri@novadge.com"
     def description = '''\
-Accept and process payments with paypal api
+Powers grails applications to Accept and process payments with paypal rest api
 '''
 
     // URL to the plugin's documentation
