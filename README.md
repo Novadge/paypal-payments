@@ -1,2 +1,2 @@
 # grails-paypal
-Accept and process payments with Paypal REST Api
+Accept and process payments with Paypal SDK
