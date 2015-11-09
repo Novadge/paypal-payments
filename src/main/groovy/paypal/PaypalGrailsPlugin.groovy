@@ -1,8 +1,11 @@
-class PaypalGrailsPlugin {
-    // the plugin version
-    def version = "0.1"
+package paypal
+
+import grails.plugins.*
+
+class PaypalGrailsPlugin extends Plugin {
+
     // the version or versions of Grails the plugin is designed for
-    def grailsVersion = "2.4 > *"
+    def grailsVersion = "3.0.1 > *"
     // resources that are excluded from plugin packaging
     def pluginExcludes = [
         "grails-app/views/error.gsp"
@@ -15,6 +18,7 @@ class PaypalGrailsPlugin {
     def description = '''\
 Powers grails applications to Accept and process payments with paypal rest api
 '''
+    def profiles = ['web']
 
     // URL to the plugin's documentation
     def documentation = "http://grails.org/plugin/paypal"
@@ -22,48 +26,45 @@ Powers grails applications to Accept and process payments with paypal rest api
     // Extra (optional) plugin metadata
 
     // License: one of 'APACHE', 'GPL2', 'GPL3'
-//    def license = "APACHE"
+    def license = "APACHE 2.0"
 
     // Details of company behind the plugin (if there is one)
     def organization = [ name: "Novadge", url: "http://www.novadge.com/" ]
 
     // Any additional developers beyond the author specified above.
-//    def developers = [ [ name: "Joe Bloggs", email: "joe@bloggs.net" ]]
+//    def developers = [ [ name: "Omasirichukwu Udeinya", email: "omasiri@novadge.com" ]]
 
     // Location of the plugin's issue tracker.
 //    def issueManagement = [ system: "JIRA", url: "http://jira.grails.org/browse/GPMYPLUGIN" ]
 
     // Online location of the plugin's browseable source code.
-    def scm = [ url: "http://github.com/Novadge/grails-paypal/" ]
+    def scm = [ url: "http://github.com/Novadge/grails-paypal" ]
 
-    def doWithWebDescriptor = { xml ->
-        // TODO Implement additions to web.xml (optional), this event occurs before
+    Closure doWithSpring() { {->
+            // TODO Implement runtime spring config (optional)
+        } 
     }
 
-    def doWithSpring = {
-        // TODO Implement runtime spring config (optional)
-    }
-
-    def doWithDynamicMethods = { ctx ->
+    void doWithDynamicMethods() {
         // TODO Implement registering dynamic methods to classes (optional)
     }
 
-    def doWithApplicationContext = { ctx ->
+    void doWithApplicationContext() {
         // TODO Implement post initialization spring config (optional)
     }
 
-    def onChange = { event ->
+    void onChange(Map<String, Object> event) {
         // TODO Implement code that is executed when any artefact that this plugin is
         // watching is modified and reloaded. The event contains: event.source,
         // event.application, event.manager, event.ctx, and event.plugin.
     }
 
-    def onConfigChange = { event ->
+    void onConfigChange(Map<String, Object> event) {
         // TODO Implement code that is executed when the project configuration changes.
         // The event is the same as for 'onChange'.
     }
 
-    def onShutdown = { event ->
+    void onShutdown(Map<String, Object> event) {
         // TODO Implement code that is executed when the application shuts down (optional)
     }
 }
