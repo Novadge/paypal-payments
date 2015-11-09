@@ -17,7 +17,7 @@ plugins {
 }
 
 version "0.1.0"
-group "org.grails.plugins"
+group "com.novadge.plugins"
 
 apply plugin: 'maven-publish'
 apply plugin: 'eclipse'
@@ -28,6 +28,19 @@ apply plugin: "org.grails.grails-gsp"
 // Used for publishing to central repository, remove if not needed
 apply from:'https://raw.githubusercontent.com/grails/grails-profile-repository/master/profiles/plugin/templates/grailsCentralPublishing.gradle'
 apply from:'https://raw.githubusercontent.com/grails/grails-profile-repository/master/profiles/plugin/templates/bintrayPublishing.gradle'
+
+bintray {
+  pkg {
+    userOrg = 'novadge' // If you want to publish to an organization
+    name = "grails-paypal"
+    issueTrackerUrl = "https://github.com/Novadge/grails-paypal/issues"
+    vcsUrl = "https://github.com/Novadge/grails-paypal"
+    version {
+      attributes = ['grails-plugin': "com.novadge.plugins:grails-paypal"]
+      name = project.version
+    }
+  }
+}
 
 ext {
     grailsVersion = project.grailsVersion
