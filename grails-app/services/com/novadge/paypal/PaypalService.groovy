@@ -7,6 +7,7 @@ import com.paypal.base.rest.PayPalResource;
 import com.paypal.base.rest.OAuthTokenCredential; 
 import com.paypal.base.rest.PayPalRESTException;
 import com.paypal.base.rest.PayPalResource;
+import grails.converters.JSON
 import com.paypal.api.payments.CreditCardToken;
 import com.paypal.api.payments.Amount;
 import com.paypal.api.payments.Refund;
@@ -35,9 +36,28 @@ import com.paypal.api.payments.Links;
 import com.paypal.api.payments.PaymentExecution;
 import com.paypal.api.payments.RedirectUrls;
 
+// rest
 
+import org.apache.http.auth.AuthScope
+import org.apache.http.auth.UsernamePasswordCredentials
+import org.apache.http.client.CredentialsProvider
+import org.apache.http.client.HttpClient
+import org.apache.http.client.entity.UrlEncodedFormEntity
+import org.apache.http.client.methods.CloseableHttpResponse
+import org.apache.http.client.methods.HttpPost
+import org.apache.http.impl.client.BasicCredentialsProvider
+import org.apache.http.impl.client.HttpClientBuilder
+import org.apache.http.message.BasicNameValuePair
+import org.apache.http.entity.StringEntity
+import org.apache.http.util.EntityUtils
+import org.apache.http.HttpEntity
+
+import java.net.URLEncoder
+
+//
 
 import grails.transaction.Transactional
+import groovy.json.JsonSlurper
 
 @Transactional
 class PaypalService {
@@ -231,6 +251,65 @@ class PaypalService {
        
     }
         
+    /*
+     * Transfer funds to another paypal account
+     * @param accessToken : paypal access token
+     * @param endpont : url endpoint for payout
+     * @param payoutProps
+     * */
+    CloseableHttpResponse createPayout(String accessToken,Map sdkConfig,Map payoutProps){
+        
+        
+        String url = sdkConfig.get(Constants.ENDPOINT) 
+        url += '/v1/payments/payouts?sync_mode=true' 
+        
+        
+        CredentialsProvider provider = new BasicCredentialsProvider()
+        UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(sdkConfig.get(Constants.CLIENT_ID), sdkConfig.get(Constants.CLIENT_SECRET))
+        provider.setCredentials(AuthScope.ANY, credentials)
+        HttpClient client = HttpClientBuilder.create().setDefaultCredentialsProvider(provider).build()
+                        
+        HttpPost httpPost = new HttpPost(url)
+        httpPost.addHeader("Content-Type",'application/json')
+        httpPost.addHeader("Authorization",accessToken)
+        //        print "receiver = ${recipientInfo}"
+        //        String recipientType = "EMAIL"
+        
+        //       Map params = ["sender_batch_header": 
+        //           ["email_subject": subject ],"items": [ [ "recipient_type": 
+        //                   recipientType, "amount": 
+        //                   ["value": amount,"currency": currencyCode ],"receiver": 
+        //                   recipientInfo,"note": note,"sender_item_id": itemId ]]]
+       
+        def jsonParam = payoutProps as JSON
+       
+        StringEntity se = new StringEntity(jsonParam.toString())
+        httpPost.setEntity(se); 
+        
+        
+        return client.execute(httpPost)
+        
+    }
+    
+    /* Return a map of transction fees and associated currency
+     * @param jsonResponse : json response received from paypal
+     * @return List of map of transaction fees eg [[currency:'usd', value:10.0]]
+     * 
+     * */
+    List listTransactionFees(Payment payment){
+//        JsonSlurper slurper = new JsonSlurper()
+//        def map = slurper.parseText(jsonString);
+        List fees = []
+
+        payment['transactions']?.each{ val ->
+            val['relatedResources']?.each{ resource ->
+                fees.add(resource['sale']['transactionFee'])
+    
+            }
+        }
+        
+        return fees
+    }
     
     /* ###FundingInstrument
      * A resource representing a Payeer's funding instrument.
@@ -238,6 +317,8 @@ class PaypalService {
      * and provided by the facilitator. This is required when
      * creating or using a tokenized funding instrument)
      * and the `CreditCardDetails`
+     * @param props : map of funding instrument properties.
+     * @returns FundingInstrument
      * */
     FundingInstrument createFundingInstrument(Map props){
             
@@ -350,7 +431,14 @@ class PaypalService {
         Capture responseCapture = authorization.capture(apiContext, capture);
         return responseCapture;
     }
-        
+    
+    /**
+     * Get authorization
+     * @param  payer : payer resource
+     * @param transactions : list of transactions
+     * @param apiContext : api context
+     * 
+     **/
     private Authorization getAuthorization(Payer payer, List<Transaction> transactions,APIContext apiContext)
     throws PayPalRESTException {
        
@@ -359,14 +447,16 @@ class PaypalService {
         .get(0).getAuthorization();
     }
     
-    def voidAuthorization(APIContext apiContext){
+    
+    /**
+     * void an authorization
+     * @param  authorization : authorization to void
+   
+     * @param apiContext : api context
+     * 
+     **/
+    def voidAuthorization(Authorization authorization,APIContext apiContext){
         
-        // ###Authorization
-        // Retrieve a Authorization object
-        // by making a Payment with intent
-        // as 'authorize'
-        Authorization authorization = getAuthorization(apiContext);
-
         // Void an Authorization
         // by POSTing to 
         // URI v1/payments/authorization/{authorization_id}/void
@@ -385,6 +475,12 @@ class PaypalService {
         //TODO : Refund a capture
     }
     
+    /* Refund a sale
+     * @param sale : sale resource
+     * param refund : refund resource
+     * @param apiContext : Api context
+     * API used: /v1/payments/capture/{capture_id}/refund
+     * */
     def refundSale(Sale sale,Refund refund, APIContext apiContext){
         
         sale.refund(apiContext, refund);
