@@ -431,7 +431,7 @@ class PaypalService {
         Capture responseCapture = authorization.capture(apiContext, capture);
         return responseCapture;
     }
-    
+        
     /**
      * Get authorization
      * @param  payer : payer resource
@@ -447,11 +447,11 @@ class PaypalService {
         .get(0).getAuthorization();
     }
     
-    
+        
     /**
      * void an authorization
      * @param  authorization : authorization to void
-   
+
      * @param apiContext : api context
      * 
      **/
