@@ -158,10 +158,14 @@ class PaypalService {
         return amount
     }                
     
-    /* A transaction defines the contract of a
+    /* Lets you create a transaction
+     * A transaction defines the contract of a
      *payment - what is the payment for and who
      * is fulfilling it. Transaction is created with
      * a `Payee` and `Amount` types
+     * @param props : map of properties
+     * props.amount : amount
+     * props.description : description
      * */
     Transaction createTransaction(Map props){
         Transaction transaction = new Transaction();
@@ -205,14 +209,10 @@ class PaypalService {
     }
     
     /* 
-     * Create a payment
-     * @param props : Map of payment properties
-     * @props.intent : payment intent eg 'sale', etc
-     * @props.payer : payer
-     * @props.transactionList : transaction list
-     * @props.redirectUrls : redirect urls
-     * @props.apiContext : ApiContext
-     * @returns Payment : payment object
+     * Create a refund
+     * @param props : Map of refund properties
+     * props.amount : amount
+     * @returns Refund : refund resource
      * */
     Refund createRefund(Map props){
         Refund refund = new Refund();
@@ -256,6 +256,7 @@ class PaypalService {
      * @param accessToken : paypal access token
      * @param endpont : url endpoint for payout
      * @param payoutProps
+     * @returns CloseableHttpResponse : response
      * */
     CloseableHttpResponse createPayout(String accessToken,Map sdkConfig,Map payoutProps){
         
@@ -272,14 +273,6 @@ class PaypalService {
         HttpPost httpPost = new HttpPost(url)
         httpPost.addHeader("Content-Type",'application/json')
         httpPost.addHeader("Authorization",accessToken)
-        //        print "receiver = ${recipientInfo}"
-        //        String recipientType = "EMAIL"
-        
-        //       Map params = ["sender_batch_header": 
-        //           ["email_subject": subject ],"items": [ [ "recipient_type": 
-        //                   recipientType, "amount": 
-        //                   ["value": amount,"currency": currencyCode ],"receiver": 
-        //                   recipientInfo,"note": note,"sender_item_id": itemId ]]]
        
         def jsonParam = payoutProps as JSON
        
@@ -291,7 +284,7 @@ class PaypalService {
         
     }
     
-    /* Return a map of transction fees and associated currency
+    /* Return a list of transction fees and associated currency
      * @param jsonResponse : json response received from paypal
      * @return List of map of transaction fees eg [[currency:'usd', value:10.0]]
      * 
@@ -311,13 +304,11 @@ class PaypalService {
         return fees
     }
     
-    /* ###FundingInstrument
+    /* Lets you create a FundingInstrument
      * A resource representing a Payeer's funding instrument.
-     * Use a Payer ID (A unique identifier of the payer generated
-     * and provided by the facilitator. This is required when
-     * creating or using a tokenized funding instrument)
-     * and the `CreditCardDetails`
      * @param props : map of funding instrument properties.
+     * @param props.creditCard : credit card
+     * @param props.creditCardToken : credit card token
      * @returns FundingInstrument
      * */
     FundingInstrument createFundingInstrument(Map props){
@@ -437,7 +428,7 @@ class PaypalService {
      * @param  payer : payer resource
      * @param transactions : list of transactions
      * @param apiContext : api context
-     * 
+     * @returns Authorization: authorization
      **/
     private Authorization getAuthorization(Payer payer, List<Transaction> transactions,APIContext apiContext)
     throws PayPalRESTException {
@@ -451,7 +442,6 @@ class PaypalService {
     /**
      * void an authorization
      * @param  authorization : authorization to void
-
      * @param apiContext : api context
      * 
      **/
@@ -466,9 +456,7 @@ class PaypalService {
 
         
     
-    /* #RefundCapture Sample
-     * This sample code demonstrate how you
-     * can do a Refund on a Capture resource
+    /* Refund a capture
      * API used: /v1/payments/capture/{capture_id}/refund
      * */
     def refundCapture(String accessToken,Refund refund){
