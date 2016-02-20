@@ -7,6 +7,7 @@ import com.paypal.base.rest.PayPalResource;
 import com.paypal.base.rest.OAuthTokenCredential; 
 import com.paypal.base.rest.PayPalRESTException;
 import com.paypal.base.rest.PayPalResource;
+import grails.converters.JSON
 import com.paypal.api.payments.CreditCardToken;
 import com.paypal.api.payments.Amount;
 import com.paypal.api.payments.Refund;
@@ -35,9 +36,28 @@ import com.paypal.api.payments.Links;
 import com.paypal.api.payments.PaymentExecution;
 import com.paypal.api.payments.RedirectUrls;
 
+// rest
 
+import org.apache.http.auth.AuthScope
+import org.apache.http.auth.UsernamePasswordCredentials
+import org.apache.http.client.CredentialsProvider
+import org.apache.http.client.HttpClient
+import org.apache.http.client.entity.UrlEncodedFormEntity
+import org.apache.http.client.methods.CloseableHttpResponse
+import org.apache.http.client.methods.HttpPost
+import org.apache.http.impl.client.BasicCredentialsProvider
+import org.apache.http.impl.client.HttpClientBuilder
+import org.apache.http.message.BasicNameValuePair
+import org.apache.http.entity.StringEntity
+import org.apache.http.util.EntityUtils
+import org.apache.http.HttpEntity
+
+import java.net.URLEncoder
+
+//
 
 import grails.transaction.Transactional
+import groovy.json.JsonSlurper
 
 @Transactional
 class PaypalService {
@@ -138,10 +158,14 @@ class PaypalService {
         return amount
     }                
     
-    /* A transaction defines the contract of a
+    /* Lets you create a transaction
+     * A transaction defines the contract of a
      *payment - what is the payment for and who
      * is fulfilling it. Transaction is created with
      * a `Payee` and `Amount` types
+     * @param props : map of properties
+     * props.amount : amount
+     * props.description : description
      * */
     Transaction createTransaction(Map props){
         Transaction transaction = new Transaction();
@@ -185,18 +209,14 @@ class PaypalService {
     }
     
     /* 
-     * Create a payment
-     * @param props : Map of payment properties
-     * @props.intent : payment intent eg 'sale', etc
-     * @props.payer : payer
-     * @props.transactionList : transaction list
-     * @props.redirectUrls : redirect urls
-     * @props.apiContext : ApiContext
-     * @returns Payment : payment object
+     * Create a refund
+     * @param props : Map of refund properties
+     * props.amount : amount
+     * @returns Refund : refund resource
      * */
     Refund createRefund(Map props){
         Refund refund = new Refund();
-	refund.setAmount(props['amount']);
+    refund.setAmount(props['amount']);
         return refund
     }
 
@@ -231,13 +251,65 @@ class PaypalService {
        
     }
         
+    /*
+     * Transfer funds to another paypal account
+     * @param accessToken : paypal access token
+     * @param endpont : url endpoint for payout
+     * @param payoutProps
+     * @returns CloseableHttpResponse : response
+     * */
+    CloseableHttpResponse createPayout(String accessToken,Map sdkConfig,Map payoutProps){
+        
+        
+        String url = sdkConfig.get(Constants.ENDPOINT) 
+        url += '/v1/payments/payouts?sync_mode=true' 
+        
+        
+        CredentialsProvider provider = new BasicCredentialsProvider()
+        UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(sdkConfig.get(Constants.CLIENT_ID), sdkConfig.get(Constants.CLIENT_SECRET))
+        provider.setCredentials(AuthScope.ANY, credentials)
+        HttpClient client = HttpClientBuilder.create().setDefaultCredentialsProvider(provider).build()
+                        
+        HttpPost httpPost = new HttpPost(url)
+        httpPost.addHeader("Content-Type",'application/json')
+        httpPost.addHeader("Authorization",accessToken)
+       
+        def jsonParam = payoutProps as JSON
+       
+        StringEntity se = new StringEntity(jsonParam.toString())
+        httpPost.setEntity(se); 
+        
+        
+        return client.execute(httpPost)
+        
+    }
     
-    /* ###FundingInstrument
+    /* Return a list of transction fees and associated currency
+     * @param jsonResponse : json response received from paypal
+     * @return List of map of transaction fees eg [[currency:'usd', value:10.0]]
+     * 
+     * */
+    List listTransactionFees(Payment payment){
+//        JsonSlurper slurper = new JsonSlurper()
+//        def map = slurper.parseText(jsonString);
+        List fees = []
+
+        payment['transactions']?.each{ val ->
+            val['relatedResources']?.each{ resource ->
+                fees.add(resource['sale']['transactionFee'])
+    
+            }
+        }
+        
+        return fees
+    }
+    
+    /* Lets you create a FundingInstrument
      * A resource representing a Payeer's funding instrument.
-     * Use a Payer ID (A unique identifier of the payer generated
-     * and provided by the facilitator. This is required when
-     * creating or using a tokenized funding instrument)
-     * and the `CreditCardDetails`
+     * @param props : map of funding instrument properties.
+     * @param props.creditCard : credit card
+     * @param props.creditCardToken : credit card token
+     * @returns FundingInstrument
      * */
     FundingInstrument createFundingInstrument(Map props){
             
@@ -337,7 +409,7 @@ class PaypalService {
         // ###Capture
         Capture capture = new Capture();
         capture.setAmount(amount);
-		
+        
         // ##IsFinalCapture
         // If set to true, all remaining 
         // funds held by the authorization 
@@ -351,6 +423,13 @@ class PaypalService {
         return responseCapture;
     }
         
+    /**
+     * Get authorization
+     * @param  payer : payer resource
+     * @param transactions : list of transactions
+     * @param apiContext : api context
+     * @returns Authorization: authorization
+     **/
     private Authorization getAuthorization(Payer payer, List<Transaction> transactions,APIContext apiContext)
     throws PayPalRESTException {
        
@@ -359,14 +438,15 @@ class PaypalService {
         .get(0).getAuthorization();
     }
     
-    def voidAuthorization(APIContext apiContext){
         
-        // ###Authorization
-        // Retrieve a Authorization object
-        // by making a Payment with intent
-        // as 'authorize'
-        Authorization authorization = getAuthorization(apiContext);
-
+    /**
+     * void an authorization
+     * @param  authorization : authorization to void
+     * @param apiContext : api context
+     * 
+     **/
+    def voidAuthorization(Authorization authorization,APIContext apiContext){
+        
         // Void an Authorization
         // by POSTing to 
         // URI v1/payments/authorization/{authorization_id}/void
@@ -376,15 +456,19 @@ class PaypalService {
 
         
     
-    /* #RefundCapture Sample
-     * This sample code demonstrate how you
-     * can do a Refund on a Capture resource
+    /* Refund a capture
      * API used: /v1/payments/capture/{capture_id}/refund
      * */
     def refundCapture(String accessToken,Refund refund){
         //TODO : Refund a capture
     }
     
+    /* Refund a sale
+     * @param sale : sale resource
+     * param refund : refund resource
+     * @param apiContext : Api context
+     * API used: /v1/payments/capture/{capture_id}/refund
+     * */
     def refundSale(Sale sale,Refund refund, APIContext apiContext){
         
         sale.refund(apiContext, refund);
