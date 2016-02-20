@@ -5,18 +5,18 @@ import grails.plugins.*
 class PaypalGrailsPlugin extends Plugin {
 
     // the version or versions of Grails the plugin is designed for
-    def grailsVersion = "3.0.1 > *"
+    def grailsVersion = "3.1.1 > *"
     // resources that are excluded from plugin packaging
     def pluginExcludes = [
         "grails-app/views/error.gsp"
     ]
 
     // TODO Fill in these fields
-    def title = "Paypal Plugin" // Headline display name of the plugin
-    def author = "Omasirichukwu Joseph Udeinya"
+    def title = "Paypal" // Headline display name of the plugin
+    def author = "Omasirichukwu Udeinya"
     def authorEmail = "omasiri@novadge.com"
     def description = '''\
-Powers grails applications to Accept and process payments with paypal rest api
+Accept and process payments with Paypal REST Api
 '''
     def profiles = ['web']
 
@@ -26,23 +26,23 @@ Powers grails applications to Accept and process payments with paypal rest api
     // Extra (optional) plugin metadata
 
     // License: one of 'APACHE', 'GPL2', 'GPL3'
-    def license = "APACHE 2.0"
+    def license = "APACHE"
 
     // Details of company behind the plugin (if there is one)
     def organization = [ name: "Novadge", url: "http://www.novadge.com/" ]
 
     // Any additional developers beyond the author specified above.
-//    def developers = [ [ name: "Omasirichukwu Udeinya", email: "omasiri@novadge.com" ]]
+//    def developers = [ [ name: "Joe Bloggs", email: "joe@bloggs.net" ]]
 
     // Location of the plugin's issue tracker.
 //    def issueManagement = [ system: "JIRA", url: "http://jira.grails.org/browse/GPMYPLUGIN" ]
 
     // Online location of the plugin's browseable source code.
-    def scm = [ url: "http://github.com/Novadge/grails-paypal" ]
+    def scm = [ url: "https://github.com/Novadge/grails-paypal/" ]
 
     Closure doWithSpring() { {->
             // TODO Implement runtime spring config (optional)
-        } 
+        }
     }
 
     void doWithDynamicMethods() {
