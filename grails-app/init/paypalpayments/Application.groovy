@@ -1,4 +1,4 @@
-package grails.paypal
+package paypalpayments
 
 import grails.boot.GrailsApp
 import grails.boot.config.GrailsAutoConfiguration

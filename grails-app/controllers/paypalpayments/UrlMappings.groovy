@@ -1,4 +1,4 @@
-package paypal
+package paypalpayments
 
 class UrlMappings {
 

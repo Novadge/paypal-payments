@@ -61,7 +61,6 @@ dependencies {
     compile "org.apache.httpcomponents:fluent-hc:$httpclientVersion"
     compile "org.apache.httpcomponents:httpclient-cache:$httpclientVersion"
     compile "org.apache.httpcomponents:httpmime:$httpclientVersion"
-    
 }
 
 task wrapper(type: Wrapper) {
@@ -76,7 +75,7 @@ grailsPublish {
     license {
         name = 'Apache-2.0'
     }
-    title = "Paypal plugin"
+    title = "Paypal Payments plugin"
     desc = "Accept and process payments with Paypal SDK"
     developers = [omasiri:"Omasirichukwu Udeinya"]
     portalUser = System.getenv('GRAILS_PORTAL_USER')

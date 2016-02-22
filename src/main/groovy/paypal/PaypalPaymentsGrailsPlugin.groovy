@@ -2,7 +2,7 @@ package paypal
 
 import grails.plugins.*
 
-class PaypalGrailsPlugin extends Plugin {
+class PaypalPaymentsGrailsPlugin extends Plugin {
 
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "3.1.1 > *"
@@ -12,7 +12,7 @@ class PaypalGrailsPlugin extends Plugin {
     ]
 
     // TODO Fill in these fields
-    def title = "Paypal" // Headline display name of the plugin
+    def title = "Paypal Payments" // Headline display name of the plugin
     def author = "Omasirichukwu Udeinya"
     def authorEmail = "omasiri@novadge.com"
     def description = '''\
@@ -35,7 +35,7 @@ Accept and process payments with Paypal REST Api
 //    def developers = [ [ name: "Joe Bloggs", email: "joe@bloggs.net" ]]
 
     // Location of the plugin's issue tracker.
-//    def issueManagement = [ system: "JIRA", url: "http://jira.grails.org/browse/GPMYPLUGIN" ]
+    def issueManagement = [ system: "github", url: "https://github.com/Novadge/grails-paypal/issues" ]
 
     // Online location of the plugin's browseable source code.
     def scm = [ url: "https://github.com/Novadge/grails-paypal/" ]
