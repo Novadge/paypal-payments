@@ -2,7 +2,7 @@
 grails:
     profile: web-plugin
     codegen:
-        defaultPackage: paypal
+        defaultPackage: paypalpayments
     spring:
         transactionManagement:
             proxies: false
