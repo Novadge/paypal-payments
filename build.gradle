@@ -70,7 +70,7 @@ grailsPublish {
     // TODO: Provide values here
     user = System.getenv('BINTRAY_USER')
     key = System.getenv('BINTRAY_KEY')
-    githubSlug = 'foo/bar'
+    githubSlug = 'Novadge/paypal-payments'
     userOrg = 'novadge' // Optional
     license {
         name = 'Apache-2.0'

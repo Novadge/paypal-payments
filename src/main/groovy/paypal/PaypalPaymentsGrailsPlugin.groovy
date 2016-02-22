@@ -35,10 +35,10 @@ Accept and process payments with Paypal REST Api
 //    def developers = [ [ name: "Joe Bloggs", email: "joe@bloggs.net" ]]
 
     // Location of the plugin's issue tracker.
-    def issueManagement = [ system: "github", url: "https://github.com/Novadge/grails-paypal/issues" ]
+    def issueManagement = [ system: "github", url: "https://github.com/Novadge/paypal-payments/issues" ]
 
     // Online location of the plugin's browseable source code.
-    def scm = [ url: "https://github.com/Novadge/grails-paypal/" ]
+    def scm = [ url: "https://github.com/Novadge/paypal-payments/" ]
 
     Closure doWithSpring() { {->
             // TODO Implement runtime spring config (optional)
