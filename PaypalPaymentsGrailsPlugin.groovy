@@ -1,6 +1,6 @@
-class PaypalGrailsPlugin {
+class PaypalPaymentsGrailsPlugin {
     // the plugin version
-    def version = "0.3"
+    def version = "0.1"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "2.4 > *"
     // resources that are excluded from plugin packaging
@@ -9,7 +9,7 @@ class PaypalGrailsPlugin {
     ]
 
     // TODO Fill in these fields
-    def title = "Paypal Plugin" // Headline display name of the plugin
+    def title = "Paypal Payments Plugin" // Headline display name of the plugin
     def author = "Omasirichukwu Joseph Udeinya"
     def authorEmail = "omasiri@novadge.com"
     def description = '''\
@@ -31,10 +31,10 @@ Lets grails applications Accept and process payments with paypal api
 //    def developers = [ [ name: "Joe Bloggs", email: "joe@bloggs.net" ]]
 
     // Location of the plugin's issue tracker.
-//    def issueManagement = [ system: "JIRA", url: "http://jira.grails.org/browse/GPMYPLUGIN" ]
+    def issueManagement = [ system: "GITHUB", url: "http://github.com/Novadge/paypal-payments/issues" ]
 
     // Online location of the plugin's browseable source code.
-    def scm = [ url: "http://github.com/Novadge/grails-paypal/" ]
+    def scm = [ url: "http://github.com/Novadge/paypal-payments/" ]
 
     def doWithWebDescriptor = { xml ->
         // TODO Implement additions to web.xml (optional), this event occurs before
