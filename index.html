@@ -42,18 +42,14 @@
 <a id="obtain-your-client-id-and-client-secret" class="anchor" href="#obtain-your-client-id-and-client-secret" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Obtain your client id and client secret</h4>
 
 <p>Obtain the API keys for your sandbox account/app and add it to your grails config file [Config.groovy for grails 2.x and application.groovy for grails 3.x]. Here's what my config file looks like: 
-`
-paypal.email="<a href="mailto:omasiri@novadge.com">omasiri@novadge.com</a>"
+<code>paypal.email="omasiri@novadge.com"
 paypal.clientId = 'your client id'
-paypal.sandbox.clientId = 'your client id'</p>
-
-<p>paypal.clientSecret = 'your client secret'
-paypal.sandbox.clientSecret ='your client secret'</p>
-
-<p>paypal.endpoint = "<a href="https://api.paypal.com">https://api.paypal.com</a>"
-paypal.sandbox.endpoint = "<a href="https://api.sandbox.paypal.com">https://api.sandbox.paypal.com</a>"</p>
-
-<p>`
+paypal.sandbox.clientId = 'your client id'
+paypal.clientSecret = 'your client secret'
+paypal.sandbox.clientSecret ='your client secret'
+paypal.endpoint = "https://api.paypal.com"
+paypal.sandbox.endpoint = "https://api.sandbox.paypal.com"
+</code>
 Notice that I added config for sandbox and live environment. The reason is to be able to switch between both environments  during app development. </p>
 
 <h4>
