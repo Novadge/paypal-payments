@@ -21,7 +21,7 @@ Accept and process payments with Paypal REST Api
     def profiles = ['web']
 
     // URL to the plugin's documentation
-    def documentation = "http://novadge.github.io/paypal-payments."
+    def documentation = "http://novadge.github.io/paypal-payments/"
 
     // Extra (optional) plugin metadata
 
