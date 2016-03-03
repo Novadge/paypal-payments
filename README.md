@@ -1,4 +1,4 @@
-# paypal payments
+# Paypal payments
 Accept and process payments with Paypal REST Api
 
 ### Introduction to Paypal payments plugin.
@@ -17,7 +17,7 @@ The Sandbox account will allow you to play around with most of the API features 
 ####Obtain your client id and client secret
 Obtain the API keys for your sandbox account/app and add it to your grails config file [Config.groovy for grails 2.x and application.groovy for grails 3.x]. Here's what my config file looks like: 
 
-`
+    `
     paypal.email="omasiri@novadge.com"
     paypal.clientId = 'your client id'
     paypal.sandbox.clientId = 'your client id'
@@ -25,7 +25,6 @@ Obtain the API keys for your sandbox account/app and add it to your grails confi
     paypal.sandbox.clientSecret ='your client secret'
     paypal.endpoint = "https://api.paypal.com"
     paypal.sandbox.endpoint = "https://api.sandbox.paypal.com"
-
 `
 
 Notice that I added config for sandbox and live environment. The reason is to be able to switch between both environments  during app development. 
@@ -34,8 +33,7 @@ Notice that I added config for sandbox and live environment. The reason is to be
 Create a grails controller. Personally, I called my own controller PaypalController.
 
 
-`grails create-controller com.mypackage.Paypal
-`
+`grails create-controller com.mypackage.Paypal`
 
 ####Add required actions
 
@@ -51,13 +49,11 @@ Inject paypalService into your controller like this...
 
 `def paypalService`
 
-
 And then create your Controller action 
 `
-import com.paypal.base.Constants; 
+    import com.paypal.base.Constants; 
 
-    def approve(){
-       
+    def approve(){      
         
         String clientId = grailsApplication.config.paypal.clientId
         String clientSecret = grailsApplication.config.paypal.clientSecret
@@ -126,7 +122,7 @@ The customer will be redirected to the Paypal website for approval. After the cu
 cancels the payment, Paypal will either call the returnUrl or cancelUrl you provided depending on 
 what action the customer performs. 
 
-`
+    `
     def execute(){
         
         String clientId = grailsApplication.config.paypal.clientId
