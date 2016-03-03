@@ -18,13 +18,13 @@ The Sandbox account will allow you to play around with most of the API features 
 Obtain the API keys for your sandbox account/app and add it to your grails config file [Config.groovy for grails 2.x and application.groovy for grails 3.x]. Here's what my config file looks like: 
 
 `
-paypal.email="omasiri@novadge.com"
-paypal.clientId = 'your client id'
-paypal.sandbox.clientId = 'your client id'
-paypal.clientSecret = 'your client secret'
-paypal.sandbox.clientSecret ='your client secret'
-paypal.endpoint = "https://api.paypal.com"
-paypal.sandbox.endpoint = "https://api.sandbox.paypal.com"
+    paypal.email="omasiri@novadge.com"
+    paypal.clientId = 'your client id'
+    paypal.sandbox.clientId = 'your client id'
+    paypal.clientSecret = 'your client secret'
+    paypal.sandbox.clientSecret ='your client secret'
+    paypal.endpoint = "https://api.paypal.com"
+    paypal.sandbox.endpoint = "https://api.sandbox.paypal.com"
 
 `
 
@@ -55,7 +55,7 @@ Inject paypalService into your controller like this...
 And then create your Controller action 
 `
 import com.paypal.base.Constants; 
-...
+
     def approve(){
        
         
@@ -68,11 +68,7 @@ import com.paypal.base.Constants;
         sdkConfig.put(Constants.ENDPOINT,endpoint)
         def accessToken = paypalService.getAccessToken(clientId,clientSecret,sdkConfig)
         def apiContext = paypalService.getAPIContext(accessToken,sdkConfig)
-        
-        
-        
-        BigDecimal total = formatNumber(number:params.amount,minFractionDigits:2) as BigDecimal
-                
+                  
         def details = paypalService.createDetails(['subtotal':"12.50"])
         def amount = paypalService.createAmount(['currency':currencyCode,'total':"12.50",'details':details])
         
@@ -153,6 +149,10 @@ what action the customer performs.
         redirect(url:"to your url")
     }
 `
+
+### Other things you can do
+You may perform payouts and other kinds of paypal transactions with this plugin. 
+
 ### Authors and Contributors
 Omasirichukwu Joseph Udeinya (@omasiri) 
 
