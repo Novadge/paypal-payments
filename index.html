@@ -20,7 +20,7 @@
 
     <section class="main-content">
       <h1>
-<a id="paypal-payments" class="anchor" href="#paypal-payments" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>paypal payments</h1>
+<a id="paypal-payments" class="anchor" href="#paypal-payments" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Paypal payments</h1>
 
 <p>Accept and process payments with Paypal REST Api</p>
 
@@ -48,14 +48,17 @@
 
 <p>Obtain the API keys for your sandbox account/app and add it to your grails config file [Config.groovy for grails 2.x and application.groovy for grails 3.x]. Here's what my config file looks like: </p>
 
-<pre><code>paypal.email="omasiri@novadge.com"
+<pre><code>`
+paypal.email="omasiri@novadge.com"
 paypal.clientId = 'your client id'
 paypal.sandbox.clientId = 'your client id'
 paypal.clientSecret = 'your client secret'
 paypal.sandbox.clientSecret ='your client secret'
 paypal.endpoint = "https://api.paypal.com"
-paypal.sandbox.endpoint = "https://api.sandbox.paypal.com"`
+paypal.sandbox.endpoint = "https://api.sandbox.paypal.com"
 </code></pre>
+
+<p>`</p>
 
 <p>Notice that I added config for sandbox and live environment. The reason is to be able to switch between both environments  during app development. </p>
 
@@ -84,10 +87,9 @@ Inject paypalService into your controller like this...</p>
 
 <p>And then create your Controller action 
 `
-import com.paypal.base.Constants; </p>
+    import com.paypal.base.Constants; </p>
 
-<pre><code>def approve(){
-
+<pre><code>def approve(){      
 
     String clientId = grailsApplication.config.paypal.clientId
     String clientSecret = grailsApplication.config.paypal.clientSecret
@@ -159,10 +161,10 @@ import com.paypal.base.Constants; </p>
 cancels the payment, Paypal will either call the returnUrl or cancelUrl you provided depending on 
 what action the customer performs. </p>
 
-<p>`
-    def execute(){</p>
+<pre><code>`
+def execute(){
 
-<pre><code>    String clientId = grailsApplication.config.paypal.clientId
+    String clientId = grailsApplication.config.paypal.clientId
     String clientSecret = grailsApplication.config.paypal.clientSecret
     String endpoint = grailsApplication.config.paypal.endpoint
     Map sdkConfig = [:] //= grailsApplication.config.paypal.sdkConfig//['mode':'live']
