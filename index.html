@@ -46,16 +46,16 @@
 <h4>
 <a id="obtain-your-client-id-and-client-secret" class="anchor" href="#obtain-your-client-id-and-client-secret" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Obtain your client id and client secret</h4>
 
-<p>Obtain the API keys for your sandbox account/app and add it to your grails config file [Config.groovy for grails 2.x and application.groovy for grails 3.x]. Here's what my config file looks like: 
-    paypal.email="<a href="mailto:omasiri@novadge.com">omasiri@novadge.com</a>"
-    paypal.clientId = 'your client id'
-    paypal.sandbox.clientId = 'your client id'
-    paypal.clientSecret = 'your client secret'
-    paypal.sandbox.clientSecret ='your client secret'
-    paypal.endpoint = "<a href="https://api.paypal.com">https://api.paypal.com</a>"
-    paypal.sandbox.endpoint = "<a href="https://api.sandbox.paypal.com">https://api.sandbox.paypal.com</a>"</p>
+<p>Obtain the API keys for your sandbox account/app and add it to your grails config file [Config.groovy for grails 2.x and application.groovy for grails 3.x]. Here's what my config file looks like: </p>
 
-<p>`</p>
+<pre><code>paypal.email="omasiri@novadge.com"
+paypal.clientId = 'your client id'
+paypal.sandbox.clientId = 'your client id'
+paypal.clientSecret = 'your client secret'
+paypal.sandbox.clientSecret ='your client secret'
+paypal.endpoint = "https://api.paypal.com"
+paypal.sandbox.endpoint = "https://api.sandbox.paypal.com"`
+</code></pre>
 
 <p>Notice that I added config for sandbox and live environment. The reason is to be able to switch between both environments  during app development. </p>
 
@@ -64,8 +64,7 @@
 
 <p>Create a grails controller. Personally, I called my own controller PaypalController.</p>
 
-<p><code>grails create-controller com.mypackage.Paypal
-</code></p>
+<p><code>grails create-controller com.mypackage.Paypal</code></p>
 
 <h4>
 <a id="add-required-actions" class="anchor" href="#add-required-actions" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Add required actions</h4>
@@ -85,7 +84,7 @@ Inject paypalService into your controller like this...</p>
 
 <p>And then create your Controller action 
 `
-    import com.paypal.base.Constants; </p>
+import com.paypal.base.Constants; </p>
 
 <pre><code>def approve(){
 
@@ -160,9 +159,10 @@ Inject paypalService into your controller like this...</p>
 cancels the payment, Paypal will either call the returnUrl or cancelUrl you provided depending on 
 what action the customer performs. </p>
 
-<pre><code>def execute(){
+<p>`
+    def execute(){</p>
 
-    String clientId = grailsApplication.config.paypal.clientId
+<pre><code>    String clientId = grailsApplication.config.paypal.clientId
     String clientSecret = grailsApplication.config.paypal.clientSecret
     String endpoint = grailsApplication.config.paypal.endpoint
     Map sdkConfig = [:] //= grailsApplication.config.paypal.sdkConfig//['mode':'live']
@@ -182,6 +182,8 @@ what action the customer performs. </p>
     redirect(url:"to your url")
 }
 </code></pre>
+
+<p>`</p>
 
 <h3>
 <a id="other-things-you-can-do" class="anchor" href="#other-things-you-can-do" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Other things you can do</h3>
