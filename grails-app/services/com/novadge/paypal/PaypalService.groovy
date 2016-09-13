@@ -98,7 +98,13 @@ class PaypalService {
      * @return details object
      */
     Details createDetails(Map<String, String> props) {
-        new Details(shipping: props.shipping, subtotal: props.subTotal, tax: props.tax)
+        //new Details(shipping: props.shipping, subtotal: props.subTotal, tax: props.tax)
+        
+		Details details = new Details();
+		details.setShipping("${props.shipping}");
+		details.setSubtotal("${props.subTotal}");
+		details.setTax("${props.tax}")
+                return details
     }
 
     /**
@@ -111,7 +117,14 @@ class PaypalService {
      */
     Amount createAmount(Map props) {
         // Total must be equal to sum of shipping, tax and subtotal.
-        new Amount(currency: (String)props.currency, total: (String)props.total, details: (Details)props.details)
+//        new Amount(currency: (String)props.currency, total: (String)props.total, details: )
+        
+        Amount amount = new Amount();
+		amount.setCurrency("${props?.currency}");
+		// Total must be equal to sum of shipping, tax and subtotal.
+		amount.setTotal("${props.total}");
+		amount.setDetails((Details)props.details);
+                return amount;
     }
 
     /**
@@ -123,7 +136,12 @@ class PaypalService {
      * @param props properties
      */
     Transaction createTransaction(Map props) {
-        new Transaction(amount: (Amount)props.amount, description: (String)props.description)
+       // new Transaction(amount: (Amount)props.amount, description: (String)props.description)
+        
+        Transaction transaction = new Transaction();
+		transaction.setAmount((Amount)props.amount);
+		transaction.setDescription("${props.description}");
+                return transaction;
     }
 
     /** ##Payer: A resource representing a Payer that funds a payment
@@ -277,7 +295,7 @@ class PaypalService {
         // an 'id' that you can use to refer to it
         // in the future payments.
 
-        new CreditCard(cvv2: (int)props.ccv2, expireMonth: (int)props.expireMonth,
+        new CreditCard(cvv2: "${props.ccv2}", expireMonth: (int)props.expireMonth,
                        expireYear: (int)props.expireYear, firstName: props.firstName.toString(),
                        lastName: props.lastName.toString(), number: props.cardNumber.toString(),
                        type: props.type.toString(), billingAddress: (Address)props.billingAddress,
