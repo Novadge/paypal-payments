@@ -1,5 +1,5 @@
 class PaypalPaymentsGrailsPlugin {
-    def version = "0.1.0"
+    def version = "0.1.1"
     def grailsVersion = "2.4 > *"
     def title = "Paypal Payments Plugin"
     def author = "Omasirichukwu Joseph Udeinya"
