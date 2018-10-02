@@ -47,7 +47,8 @@ dependencies {
     testCompile "org.grails.plugins:geb"
     testRuntime "org.seleniumhq.selenium:selenium-htmlunit-driver:2.47.1"
     testRuntime "net.sourceforge.htmlunit:htmlunit:2.18"
-    compile 'com.paypal.sdk:rest-api-sdk:1.2.9'
+    // https://mvnrepository.com/artifact/com.paypal.sdk/rest-api-sdk
+    compile group: 'com.paypal.sdk', name: 'rest-api-sdk', version: '1.14.0'
     String httpclientVersion = '4.3.6'
     compile "org.apache.httpcomponents:httpclient:$httpclientVersion"
     compile "org.apache.httpcomponents:fluent-hc:$httpclientVersion"

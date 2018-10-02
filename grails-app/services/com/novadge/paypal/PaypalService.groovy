@@ -277,8 +277,8 @@ class PaypalService {
         // an 'id' that you can use to refer to it
         // in the future payments.
 
-        new CreditCard(cvv2: (int)props.ccv2, expireMonth: (int)props.expireMonth,
-                       expireYear: (int)props.expireYear, firstName: props.firstName.toString(),
+        new CreditCard(cvv2: props.ccv2 as Integer, expireMonth: props.expireMonth as Integer,
+                       expireYear: props.expireYear as Integer, firstName: props.firstName.toString(),
                        lastName: props.lastName.toString(), number: props.cardNumber.toString(),
                        type: props.type.toString(), billingAddress: (Address)props.billingAddress,
                             payerId: props.payerId.toString()).create(apiContext)
