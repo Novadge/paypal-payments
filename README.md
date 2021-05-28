@@ -50,6 +50,7 @@ Inject paypalService into your controller like this...
 And then create your Controller action
 
     import com.paypal.base.Constants
+    import com.paypal.api.payments.*
     ...
 
     def approve() {
@@ -62,17 +63,58 @@ And then create your Controller action
                          (Constants.ENDPOINT): endpoint]
         def accessToken = paypalService.getAccessToken(clientId, clientSecret, sdkConfig)
         def apiContext = paypalService.getAPIContext(accessToken, sdkConfig)
+      
+
+        List<Item> items =[]
+        /** 
+         *Assuming we have an iteration containing our shopping basket items:
+          paymentItems.each {PaymentItem paymentItem ->
+                def itemTransaction = paypalService.createItem(['name':paymentItem.itemName,
+                                        'price':  paymentItem.amount?.toString(),
+                                        'quantity': paymentItem.quantity?.toString(),
+                                        'currency': paymentItem.payment.currency?.toString(),
+                                        'description': paymentItem.itemName])
+                items.add(itemTransaction)
+          }
+         */
+
+        def payer = paypalService.createPayer(paymentMethod: 'paypal')
+
+        Map addressInfo=[:]
+        addressInfo.line1 = '1 The Highstreet'
+        addressInfo.countryCode = 'GB'
+        addressInfo.city = 'London'
+        addressInfo.postalCode = 'SW1 1TT'
+        addressInfo.state = ''
+
+        Map userInfo =[:]
+        userInfo.salutation ='Mr'
+        userInfo.firstName ='John'
+        userInfo.lastName ='Smith'
+        userInfo.email ='john.smith@gmail.com'   // I think this has to be their valid paypal email 
+        userInfo.phoneType ='mobile'
+        userInfo.phone ='123-123456789'
+        userInfo.phone ='123-123456789'
+        userInfo.billingAddress =paypalService.createAddress(addressInfo)
+       
+        
+        def shippingAddress = paypalService.createShippingAddress(addressInfo)
+        //items is created in our commented out iteration above
+        ItemList itemList = paypalService.createItemList(['items':items, 'shippingAddress':shippingAddress])
+
+        PayerInfo payerInfo = paypalService.createPayerInfo(userInfo)
+        Payer payer = paypalService.createPayer(['paymentMethod': 'paypal', 'payerInfo': payerInfo])
 
 
-        BigDecimal total = formatNumber(number: params.amount, minFractionDigits: 2) as BigDecimal
+       BigDecimal total = formatNumber(number: params.amount, minFractionDigits: 2) as BigDecimal
 
         def details = paypalService.createDetails(subtotal: "12.50")
         def amount = paypalService.createAmount(currency: currencyCode, total: "12.50", details: details)
 
-        def transaction = paypalService.createTransaction(amount: amount, description: "your description", details: details)
+        Transaction transaction = paypalService.createTransaction(['amount': amount,
+                                                                   'description': "Final total", 'itemList':itemList])
         def transactions = [transaction]
 
-        def payer = paypalService.createPayer(paymentMethod: 'paypal')
         def cancelUrl = "http://myexampleurl/cancel"
         def returnUrl = "http://mypaypalController/execute"
 

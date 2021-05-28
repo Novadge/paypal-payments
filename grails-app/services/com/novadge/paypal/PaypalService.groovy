@@ -1,5 +1,9 @@
 package com.novadge.paypal
-
+import com.paypal.api.payments.Item
+import com.paypal.api.payments.ItemList
+import com.paypal.api.payments.Measurement
+import com.paypal.api.payments.PayerInfo
+import com.paypal.api.payments.ShippingAddress
 import grails.converters.JSON
 import groovy.transform.CompileStatic
 
@@ -87,7 +91,19 @@ class PaypalService {
      */
     Address createAddress(Map<String, String> props) {
         new Address(line1: props.line1, city: props.city, countryCode: props.countryCode,
-                    postalCode: props.postalCode, state: props.state)
+                postalCode: props.postalCode, state: props.state)
+    }
+
+    /**
+     * createShippingAddress
+     * Retrieve an ShippingAddress object
+     * @param props
+     * eg ["Line1":"34 valley crescent","city":"Enugu",....]
+     * @return ShippingAddress
+     */
+    ShippingAddress createShippingAddress(Map<String, String> props) {
+        new ShippingAddress(line1: props.line1, city: props.city, countryCode: props.countryCode,
+                postalCode: props.postalCode, state: props.state)
     }
 
     /**
@@ -123,9 +139,30 @@ class PaypalService {
      * @param props properties
      */
     Transaction createTransaction(Map props) {
-        new Transaction(amount: (Amount)props.amount, description: (String)props.description)
+        new Transaction(amount: (Amount)props.amount,
+                description: (String)props.description,
+                itemList: (ItemList)props.itemList)
     }
 
+    /**
+     * createItem creates a paypal Item for transaction listing
+     * @param props variety of inputs can be defined
+     * name price description quantity currency are important
+     * @return Item
+     */
+    Item createItem(Map props) {
+        new Item(name: (String)props.name,
+                price: (String)props.price,
+                description: (String)props.description,
+                quantity:(String)props.quantity,
+                currency:(String)props.currency,
+                sku:(String)props.sku,
+                tax:(String)props.tax,
+                category:(String)props.category,
+                length:(Measurement)props.length,
+                height:(Measurement)props.height,
+                width:(Measurement)props.width)
+    }
     /** ##Payer: A resource representing a Payer that funds a payment
      * Lets you create a payer object.
      * @param props properties
@@ -135,8 +172,47 @@ class PaypalService {
      */
     Payer createPayer(Map props) {
         new Payer(paymentMethod: (String)props.paymentMethod,
-                  fundingInstruments: (List<FundingInstrument>)props.fundingInstrumentList)
+                payerInfo: (PayerInfo)props.payerInfo,
+                fundingInstruments: (List<FundingInstrument>)props.fundingInstrumentList)
     }
+
+    /**
+     * Lets you create payerInfo
+     * holds underlying details of users name
+     * Birth date of the Payer in ISO8601 format (yyyy-mm-dd)
+     * shippingAddress
+     * BillingAddress
+     * @param props properties
+     * @param props
+     * @return PayerInfo
+     */
+    PayerInfo createPayerInfo(Map props) {
+        new PayerInfo(
+                salutation:(String)props.salutation,
+                firstName: (String)props.firstName,
+                middleName: (String)props.middleName,
+                lastName: (String)props.lastName,
+                birthDate:(String)props.birthDate,
+                phone:(String)props.phone,
+                phoneType:(String)props.phoneType,
+                countryCode:(String)props.countryCode,
+                email:(String)props.email,
+                billingAddress: (Address)props.address
+        )
+    }
+
+    /**
+     * createItemList
+     * @param props a list of items & shippingAddress
+     * @return ItemList object
+     */
+    ItemList createItemList(Map props) {
+        new ItemList(
+                items: (List<Item>)props.items,
+                shippingAddress: (ShippingAddress)props.shippingAddress
+        )
+    }
+
 
     /**
      * Create a payment
@@ -150,9 +226,9 @@ class PaypalService {
      */
     Payment createPayment(Map props) {
         new Payment(intent: (String)props.intent,
-                    payer: (Payer)props.payer,
-                    transactions: (List<Transaction>)props.transactionList,
-                    redirectUrls: (RedirectUrls)props.redirectUrls).create((APIContext)props.apiContext)
+                payer: (Payer)props.payer,
+                transactions: (List<Transaction>)props.transactionList,
+                redirectUrls: (RedirectUrls)props.redirectUrls).create((APIContext)props.apiContext)
     }
 
     /**
@@ -175,7 +251,7 @@ class PaypalService {
      */
     Payment createPaymentExecution(Map<String, String> props, APIContext apiContext) {
         return Payment.get(apiContext, props.paymentId).execute(
-            apiContext, new PaymentExecution(payerId: props.payerId))
+                apiContext, new PaymentExecution(payerId: props.payerId))
     }
 
     /**
@@ -205,8 +281,8 @@ class PaypalService {
 
         CredentialsProvider provider = new BasicCredentialsProvider()
         provider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(
-            sdkConfig[Constants.CLIENT_ID],
-            sdkConfig[Constants.CLIENT_SECRET]))
+                sdkConfig[Constants.CLIENT_ID],
+                sdkConfig[Constants.CLIENT_SECRET]))
 
         return HttpClientBuilder.create().setDefaultCredentialsProvider(provider).build().execute(httpPost)
     }
@@ -238,7 +314,7 @@ class PaypalService {
      */
     FundingInstrument createFundingInstrument(Map props) {
         new FundingInstrument(creditCard: (CreditCard)props.creditCard,
-                              creditCardToken: (CreditCardToken)props.creditCardToken)
+                creditCardToken: (CreditCardToken)props.creditCardToken)
     }
 
     /**
@@ -278,10 +354,10 @@ class PaypalService {
         // in the future payments.
 
         new CreditCard(cvv2: props.ccv2 as Integer, expireMonth: props.expireMonth as Integer,
-                       expireYear: props.expireYear as Integer, firstName: props.firstName.toString(),
-                       lastName: props.lastName.toString(), number: props.cardNumber.toString(),
-                       type: props.type.toString(), billingAddress: (Address)props.billingAddress,
-                            payerId: props.payerId.toString()).create(apiContext)
+                expireYear: props.expireYear as Integer, firstName: props.firstName.toString(),
+                lastName: props.lastName.toString(), number: props.cardNumber.toString(),
+                type: props.type.toString(), billingAddress: (Address)props.billingAddress,
+                payerId: props.payerId.toString()).create(apiContext)
     }
 
     /**
@@ -326,8 +402,8 @@ class PaypalService {
      */
     private Authorization getAuthorization(Payer payer, List<Transaction> transactions, APIContext apiContext) throws PayPalRESTException {
         createPayment(intent: 'authorize', payer: payer,
-                      transactionList: transactions,
-                      apiContext: apiContext).transactions[0].relatedResources[0].authorization
+                transactionList: transactions,
+                apiContext: apiContext).transactions[0].relatedResources[0].authorization
     }
 
     /**
