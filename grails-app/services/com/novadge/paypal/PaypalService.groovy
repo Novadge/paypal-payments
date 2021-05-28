@@ -1,5 +1,8 @@
 package com.novadge.paypal
 
+import com.paypal.api.payments.ItemList
+import com.paypal.api.payments.PayerInfo
+import com.paypal.api.payments.ShippingAddress
 import grails.converters.JSON
 import groovy.transform.CompileStatic
 
@@ -91,6 +94,18 @@ class PaypalService {
     }
 
     /**
+     * ShippingAddress
+     * Retrieve an address object
+     * @param props properties
+     * eg ["Line1":"34 valley crescent","city":"Enugu",....]
+     * @return address
+     */
+    ShippingAddress createShippingAddress(Map<String, String> props) {
+        new ShippingAddress(line1: props.line1, city: props.city, countryCode: props.countryCode,
+                postalCode: props.postalCode, state: props.state)
+    }
+
+    /**
      * Lets you specify details of a payment amount.
      * Create details for a payment
      * @param props properties
@@ -136,6 +151,48 @@ class PaypalService {
     Payer createPayer(Map props) {
         new Payer(paymentMethod: (String)props.paymentMethod,
                   fundingInstruments: (List<FundingInstrument>)props.fundingInstrumentList)
+    }
+
+
+    /**
+     * Lets you create payerInfo
+     * holds underlying details of users name
+     * Birth date of the Payer in ISO8601 format (yyyy-mm-dd)
+     * shippingAddress
+     * BillingAddress
+     * @param props properties
+     * @param props
+     * @return PayerInfo
+     */
+    PayerInfo createPayerInfo(Map props) {
+        new PayerInfo(
+                salutation:(String)props.salutation,
+                firstName: (String)props.firstName,
+                middleName: (String)props.middleName,
+                lastName: (String)props.lastName,
+                birthDate:(String)props.birthDate,
+                phone:(String)props.phone,
+                phoneType:(String)props.phoneType,
+                countryCode:(String)props.countryCode,
+                email:(String)props.email,
+                shippingAddress: (ShippingAddress)props.shippingAddress,
+                billingAddress: (Address)props.address)
+    }
+
+    /**
+     * bindPayerWithInfoAndTransaction
+     * Given a payer PayerInfo and a transaction
+     * it binds those important bits together to combine full details to be sent to paypal
+     * @param payer
+     * @param payerInfo
+     * @param transaction
+     * @param shippingAddress
+     */
+    void bindPayerWithInfoAndTransaction(Payer payer, PayerInfo payerInfo, Transaction transaction, ShippingAddress shippingAddress) {
+        payer.setPayerInfo(payerInfo)
+        ItemList itemList = new ItemList()
+        itemList.setShippingAddress(shippingAddress)
+        transaction.setItemList(itemList)
     }
 
     /**

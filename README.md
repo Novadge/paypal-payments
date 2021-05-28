@@ -73,6 +73,29 @@ And then create your Controller action
         def transactions = [transaction]
 
         def payer = paypalService.createPayer(paymentMethod: 'paypal')
+
+        Map addressInfo=[:]
+    
+        addressInfo.line1 = '1 The Highstreet'
+        addressInfo.countryCode = 'GB'
+        addressInfo.city = 'London'
+        addressInfo.postalCode = 'SW1 1TT'
+        addressInfo.state = ''
+        PayerInfo payerInfo = paypalService.createPayerInfo([
+            'salutation': 'Mr',
+            'firstName': 'John',
+            'lastName': 'Smith',
+            'email': 'john.smith@gmail.com',
+            'phoneType':'mobile',
+            'phone':'123-123456789',
+            'countryCode': 'GB',
+            'billingAddress': paypalService.createAddress(addressInfo),
+            'shippingAddress': paypalService.createShippingAddress(addressInfo)
+        ])
+
+        paypalService.bindPayerWithInfoAndTransaction(payer, payerInfo, transaction, paypalService.createShippingAddress(addressInfo))
+
+
         def cancelUrl = "http://myexampleurl/cancel"
         def returnUrl = "http://mypaypalController/execute"
 
