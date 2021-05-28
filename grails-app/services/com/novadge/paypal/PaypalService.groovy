@@ -227,7 +227,7 @@ class PaypalService {
     Payment createPayment(Map props) {
         new Payment(intent: (String)props.intent,
                 payer: (Payer)props.payer,
-                transactions: (List<Transaction>)props.transactions,
+                transactions: (List<Transaction>)props.transactionList,
                 redirectUrls: (RedirectUrls)props.redirectUrls).create((APIContext)props.apiContext)
     }
 
